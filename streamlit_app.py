@@ -1,40 +1,30 @@
-import altair as alt
-import numpy as np
-import pandas as pd
 import streamlit as st
+from datetime import datetime
 
-"""
-# Welcome to Streamlit!
+def calculate_pregnancy_info(due_date, today):
+    today = datetime.strptime(today, "%Y-%m-%d").date()
+    pregnancy_days = (due_date - today).days
+    pregnancy_weeks = 39 - pregnancy_days // 7
+    pregnancy_days %= 7
+    return pregnancy_weeks, 7 - pregnancy_days
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+def calculate_pregnancy_info_interface(due_date_str, today_str):
+    try:
+        due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
+        weeks, days = calculate_pregnancy_info(due_date, today_str)
+        result = f"孕周: {weeks} 周 {days} 天"
+    except ValueError:
+        result = "请输入有效的日期格式（YYYY-MM-DD）"
+    return result
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Streamlit app
+st.title("孕周计算器")
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+# Input form
+due_date = st.text_input("请输入预产期（YYYY-MM-DD）：")
+today_date = st.text_input("请输入今天的日期（YYYY-MM-DD）：", value=datetime.now().date())
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
-
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
-
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
-
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+# Calculate button
+if st.button("计算"):
+    result = calculate_pregnancy_info_interface(due_date, today_date)
+    st.write(result)
