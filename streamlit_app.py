@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime, timedelta
+import time
 
 def calculate_pregnancy_info(due_date, today):
     today = datetime.strptime(today, "%Y-%m-%d").date()
@@ -44,4 +45,6 @@ if st.button("计算"):
     st.write(result)
 
 # Set up timer to request service every hour
-st.timer(3600, request_service)  # 3600 seconds = 1 hour
+while True:
+    request_service()
+    time.sleep(3600)  # Sleep for 1 hour
