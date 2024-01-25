@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def calculate_pregnancy_info(due_date, today):
     today = datetime.strptime(today, "%Y-%m-%d").date()
@@ -17,6 +17,20 @@ def calculate_pregnancy_info_interface(due_date_str, today_str):
         result = "请输入有效的日期格式（YYYY-MM-DD）"
     return result
 
+# Function to be called every hour
+def request_service():
+    # Add your service request logic here
+    from gradio_client import Client
+
+    client = Client("https://aistudio.baidu.com/serving/app/16223/")
+    result = client.predict(
+				    "2024-01-25",	# str in '请输入预产期（YYYY-MM-DD）：' Textbox component
+				    "2024-01-25",	# str in '请输入今天的日期（YYYY-MM-DD）：' Textbox component
+				    fn_index=0
+    )
+    print(result)
+    st.write("Service requested!")
+
 # Streamlit app
 st.title("孕周计算器")
 
@@ -28,3 +42,6 @@ today_date = st.text_input("请输入今天的日期（YYYY-MM-DD）：", value=
 if st.button("计算"):
     result = calculate_pregnancy_info_interface(due_date, today_date)
     st.write(result)
+
+# Set up timer to request service every hour
+st.timer(3600, request_service)  # 3600 seconds = 1 hour
